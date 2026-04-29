@@ -28,8 +28,8 @@ export default function IfrWaypoints() {
         chartMap={{
           imageUrl: '/assets/ifr-waypoints-chart.png',
           bounds: [
-            [45.95, 5.25],
-            [48.2, 10.55],
+            [45.6, 5.4],
+            [47.6, 8.4],
           ],
         }}
       />
