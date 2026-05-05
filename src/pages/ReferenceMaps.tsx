@@ -12,19 +12,36 @@ import { ifrWaypoints } from '../data/ifrWaypoints';
 import type { TrainingPoint } from '../types/training';
 
 type DatasetMode = 'geography' | 'ifr';
-type IfrMapMode = 'geographic' | 'chart';
+type IfrMapMode = 'geographic' | 'ini' | 'enrc';
 
 const switzerlandCenter: LatLngExpression = [46.65, 6.8];
-const ifrChart = {
-  imageUrl: '/assets/ifr-ini-chart.png',
-  bounds: [
-    [45.6, 5.4],
-    [47.6, 8.4],
-  ] as [[number, number], [number, number]],
+const ifrCharts: Record<Exclude<IfrMapMode, 'geographic'>, {
+  label: string;
+  imageUrl: string;
+  bounds: [[number, number], [number, number]];
+}> = {
+  ini: {
+    label: 'INI blank chart',
+    imageUrl: '/assets/ifr-ini-chart.png',
+    bounds: [
+      [45.6, 5.4],
+      [47.6, 8.4],
+    ],
+  },
+  enrc: {
+    label: 'ENRC Skyguide',
+    imageUrl: '/assets/ifr-enrc-chart.png',
+    bounds: [
+      [45.95, 5.25],
+      [48.2, 10.55],
+    ],
+  },
 };
 
 function getMapCenter(datasetMode: DatasetMode, ifrMapMode: IfrMapMode) {
-  if (datasetMode === 'ifr' && ifrMapMode === 'chart') {
+  if (datasetMode === 'ifr' && ifrMapMode !== 'geographic') {
+    const ifrChart = ifrCharts[ifrMapMode];
+
     return [
       (ifrChart.bounds[0][0] + ifrChart.bounds[1][0]) / 2,
       (ifrChart.bounds[0][1] + ifrChart.bounds[1][1]) / 2,
@@ -47,7 +64,10 @@ export default function ReferenceMaps() {
   const points = useMemo(() => {
     return sortPoints(datasetMode === 'geography' ? geographyPoints : ifrWaypoints);
   }, [datasetMode]);
-  const isIfrChart = datasetMode === 'ifr' && ifrMapMode === 'chart';
+  const activeIfrChart =
+    datasetMode === 'ifr' && ifrMapMode !== 'geographic'
+      ? ifrCharts[ifrMapMode]
+      : null;
 
   return (
     <div className="w-full">
@@ -111,7 +131,7 @@ export default function ReferenceMaps() {
               </div>
 
               {datasetMode === 'ifr' && (
-                <div className="grid grid-cols-2 gap-2 rounded-full bg-slate-100 p-1">
+                <div className="grid gap-2 rounded-3xl bg-slate-100 p-1 sm:grid-cols-3">
                   <button
                     type="button"
                     onClick={() => setIfrMapMode('geographic')}
@@ -124,18 +144,21 @@ export default function ReferenceMaps() {
                   >
                     Geo map
                   </button>
-                  <button
-                    type="button"
-                    onClick={() => setIfrMapMode('chart')}
-                    className={[
-                      'rounded-full px-4 py-2 text-sm font-bold transition focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2',
-                      ifrMapMode === 'chart'
-                        ? 'bg-sky-700 text-white shadow-sm shadow-sky-900/20'
-                        : 'text-slate-700 hover:bg-white hover:text-slate-950',
-                    ].join(' ')}
-                  >
-                    IFR chart
-                  </button>
+                  {Object.entries(ifrCharts).map(([mode, chart]) => (
+                    <button
+                      key={mode}
+                      type="button"
+                      onClick={() => setIfrMapMode(mode as IfrMapMode)}
+                      className={[
+                        'rounded-full px-4 py-2 text-sm font-bold transition focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2',
+                        ifrMapMode === mode
+                          ? 'bg-sky-700 text-white shadow-sm shadow-sky-900/20'
+                          : 'text-slate-700 hover:bg-white hover:text-slate-950',
+                      ].join(' ')}
+                    >
+                      {chart.label}
+                    </button>
+                  ))}
                 </div>
               )}
             </div>
@@ -150,8 +173,11 @@ export default function ReferenceMaps() {
             scrollWheelZoom
             className="h-full w-full"
           >
-            {isIfrChart ? (
-              <ImageOverlay url={ifrChart.imageUrl} bounds={ifrChart.bounds} />
+            {activeIfrChart ? (
+              <ImageOverlay
+                url={activeIfrChart.imageUrl}
+                bounds={activeIfrChart.bounds}
+              />
             ) : (
               <TileLayer
                 attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'

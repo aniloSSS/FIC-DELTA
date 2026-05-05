@@ -15,10 +15,23 @@ type MapTrainingProps = {
   description: string;
   points: TrainingPoint[];
   storageKey: string;
-  chartMap?: {
-    imageUrl: string;
-    bounds: [[number, number], [number, number]];
-  };
+  chartMaps?: ChartMap[];
+};
+
+type ChartMap = {
+  id: string;
+  label: string;
+  imageUrl: string;
+  bounds: [[number, number], [number, number]];
+};
+
+type MapModeOption = {
+  label: string;
+  value: string;
+};
+
+type ChartMapMode = MapModeOption & {
+  chartMap: ChartMap;
 };
 
 type ClickResult = {
@@ -35,7 +48,7 @@ type Coordinate = {
 type PointStatus = 'unknown' | 'known';
 type PointFilter = 'all' | 'unknown' | 'known';
 type TrainingView = 'training' | 'points';
-type MapMode = 'learning' | 'blank' | 'chart';
+type MapMode = string;
 type PointStatuses = Record<string, PointStatus>;
 
 const switzerlandCenter: LatLngExpression = [46.65, 6.8];
@@ -60,7 +73,7 @@ function getInitialMapMode(): MapMode {
 
   const storedMode = window.localStorage.getItem(mapModeStorageKey);
 
-  if (storedMode === 'learning' || storedMode === 'chart') {
+  if (storedMode) {
     return storedMode;
   }
 
@@ -138,7 +151,7 @@ export default function MapTraining({
   description,
   points,
   storageKey,
-  chartMap,
+  chartMaps = [],
 }: MapTrainingProps) {
   const [activeView, setActiveView] = useState<TrainingView>('training');
   const [currentPointId, setCurrentPointId] = useState(points[0]?.id ?? '');
@@ -184,20 +197,29 @@ export default function MapTraining({
     filteredTrainingPoints.find((point) => point.id === currentPointId) ??
     filteredTrainingPoints[0];
 
-  const activeMapMode = mapMode === 'chart' && !chartMap ? 'blank' : mapMode;
-  const mapModes: { label: string; value: MapMode }[] = [
+  const chartMapModes: ChartMapMode[] = chartMaps.map((chart) => ({
+    label: chart.label,
+    value: `chart:${chart.id}`,
+    chartMap: chart,
+  }));
+  const mapModes: MapModeOption[] = [
     { label: 'Learning map', value: 'learning' },
     { label: 'Blank map', value: 'blank' },
-    ...(chartMap ? [{ label: 'SkyGuide chart', value: 'chart' as const }] : []),
+    ...chartMapModes,
   ];
-  const chartCenter: LatLngExpression | null = chartMap
+  const selectedChartMode = chartMapModes.find((mode) => mode.value === mapMode);
+  const activeMapMode = mapModes.some((mode) => mode.value === mapMode)
+    ? mapMode
+    : 'blank';
+  const selectedChartMap = selectedChartMode?.chartMap ?? null;
+  const chartCenter: LatLngExpression | null = selectedChartMap
     ? [
-        (chartMap.bounds[0][0] + chartMap.bounds[1][0]) / 2,
-        (chartMap.bounds[0][1] + chartMap.bounds[1][1]) / 2,
+        (selectedChartMap.bounds[0][0] + selectedChartMap.bounds[1][0]) / 2,
+        (selectedChartMap.bounds[0][1] + selectedChartMap.bounds[1][1]) / 2,
       ]
     : null;
   const mapCenter: LatLngExpression =
-    activeMapMode === 'chart' && chartCenter ? chartCenter : switzerlandCenter;
+    selectedChartMap && chartCenter ? chartCenter : switzerlandCenter;
   const answerPosition: LatLngExpression | null = currentPoint
     ? [currentPoint.latitude, currentPoint.longitude]
     : null;
@@ -370,10 +392,10 @@ export default function MapTraining({
                   attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
                   url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                 />
-              ) : activeMapMode === 'chart' && chartMap ? (
+              ) : selectedChartMap ? (
                 <ImageOverlay
-                  url={chartMap.imageUrl}
-                  bounds={chartMap.bounds}
+                  url={selectedChartMap.imageUrl}
+                  bounds={selectedChartMap.bounds}
                 />
               ) : (
                 <TileLayer

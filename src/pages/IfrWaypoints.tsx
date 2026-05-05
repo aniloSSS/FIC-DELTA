@@ -25,13 +25,26 @@ export default function IfrWaypoints() {
         description="Learn and locate the main IFR waypoints used in the DELTA sector."
         points={ifrWaypoints}
         storageKey="fic-delta-ifr-progress"
-        chartMap={{
-          imageUrl: '/assets/ifr-ini-chart.png',
-          bounds: [
-            [45.6, 5.4],
-            [47.6, 8.4],
-          ],
-        }}
+        chartMaps={[
+          {
+            id: 'ini',
+            label: 'INI blank chart',
+            imageUrl: '/assets/ifr-ini-chart.png',
+            bounds: [
+              [45.6, 5.4],
+              [47.6, 8.4],
+            ],
+          },
+          {
+            id: 'enrc',
+            label: 'ENRC Skyguide chart',
+            imageUrl: '/assets/ifr-enrc-chart.png',
+            bounds: [
+              [45.95, 5.25],
+              [48.2, 10.55],
+            ],
+          },
+        ]}
       />
     </div>
   );
