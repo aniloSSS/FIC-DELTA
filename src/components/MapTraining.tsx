@@ -146,6 +146,19 @@ function MapClickHandler({
   return null;
 }
 
+function getRandomPoint(points: TrainingPoint[], excludedPointId?: string) {
+  if (points.length === 0) {
+    return null;
+  }
+
+  const availablePoints =
+    points.length > 1 && excludedPointId
+      ? points.filter((point) => point.id !== excludedPointId)
+      : points;
+
+  return availablePoints[Math.floor(Math.random() * availablePoints.length)];
+}
+
 export default function MapTraining({
   title,
   description,
@@ -154,7 +167,9 @@ export default function MapTraining({
   chartMaps = [],
 }: MapTrainingProps) {
   const [activeView, setActiveView] = useState<TrainingView>('training');
-  const [currentPointId, setCurrentPointId] = useState(points[0]?.id ?? '');
+  const [currentPointId, setCurrentPointId] = useState(
+    () => getRandomPoint(points)?.id ?? '',
+  );
   const [pointStatuses, setPointStatuses] = useState<PointStatuses>(() =>
     getInitialStatuses(points, storageKey),
   );
@@ -309,14 +324,11 @@ export default function MapTraining({
       return;
     }
 
-    const currentFilteredIndex = Math.max(
-      filteredTrainingPoints.findIndex((point) => point.id === currentPoint?.id),
-      0,
-    );
-    const nextPoint =
-      filteredTrainingPoints[(currentFilteredIndex + 1) % filteredTrainingPoints.length];
+    const nextPoint = getRandomPoint(filteredTrainingPoints, currentPoint?.id);
 
-    setCurrentPointId(nextPoint.id);
+    if (nextPoint) {
+      setCurrentPointId(nextPoint.id);
+    }
     resetAttempt();
   }
 
@@ -336,8 +348,8 @@ export default function MapTraining({
       return pointStatuses[point.id] === nextFilter;
     });
 
-    if (!nextPoints.some((point) => point.id === currentPointId) && nextPoints[0]) {
-      setCurrentPointId(nextPoints[0].id);
+    if (!nextPoints.some((point) => point.id === currentPointId)) {
+      setCurrentPointId(getRandomPoint(nextPoints)?.id ?? '');
     }
   }
 
