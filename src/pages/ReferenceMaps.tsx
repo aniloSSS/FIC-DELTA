@@ -11,6 +11,8 @@ import { geographyPoints } from '../data/geographyPoints';
 import { ifrWaypoints } from '../data/ifrWaypoints';
 import type { TrainingPoint } from '../types/training';
 
+const assetUrl = (path: string) => `${import.meta.env.BASE_URL}${path}`;
+
 type DatasetMode = 'geography' | 'ifr';
 type GeographyMapMode = 'geographic' | 'icao';
 type IfrMapMode = 'geographic' | 'ini' | 'enrc';
@@ -24,7 +26,7 @@ const switzerlandCenter: LatLngExpression = [46.65, 6.8];
 const geographyCharts: Record<Exclude<GeographyMapMode, 'geographic'>, ChartConfig> = {
   icao: {
     label: 'ICAO chart',
-    imageUrl: '/assets/geography-icao-chart.jpg',
+    imageUrl: assetUrl('assets/geography-icao-chart.jpg'),
     bounds: [
       [45.540373, 5.338622],
       [47.908042, 10.85492],
@@ -34,7 +36,7 @@ const geographyCharts: Record<Exclude<GeographyMapMode, 'geographic'>, ChartConf
 const ifrCharts: Record<Exclude<IfrMapMode, 'geographic'>, ChartConfig> = {
   ini: {
     label: 'INI blank chart',
-    imageUrl: '/assets/ifr-ini-chart.png',
+    imageUrl: assetUrl('assets/ifr-ini-chart.png'),
     bounds: [
       [45.6, 5.4],
       [47.6, 8.4],
@@ -42,7 +44,7 @@ const ifrCharts: Record<Exclude<IfrMapMode, 'geographic'>, ChartConfig> = {
   },
   enrc: {
     label: 'ENRC Skyguide',
-    imageUrl: '/assets/ifr-enrc-chart.png',
+    imageUrl: assetUrl('assets/ifr-enrc-chart.png'),
     bounds: [
       [45.95, 5.25],
       [48.2, 10.55],

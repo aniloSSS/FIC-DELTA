@@ -1,6 +1,8 @@
 import MapTraining from '../components/MapTraining';
 import { geographyPoints } from '../data/geographyPoints';
 
+const assetUrl = (path: string) => `${import.meta.env.BASE_URL}${path}`;
+
 export default function Geography() {
   return (
     <div className="w-full">
@@ -29,7 +31,7 @@ export default function Geography() {
           {
             id: 'icao',
             label: 'ICAO chart',
-            imageUrl: '/assets/geography-icao-chart.jpg',
+            imageUrl: assetUrl('assets/geography-icao-chart.jpg'),
             bounds: [
               [45.540373, 5.338622],
               [47.908042, 10.85492],

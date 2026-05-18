@@ -1,6 +1,8 @@
 import MapTraining from '../components/MapTraining';
 import { ifrWaypoints } from '../data/ifrWaypoints';
 
+const assetUrl = (path: string) => `${import.meta.env.BASE_URL}${path}`;
+
 export default function IfrWaypoints() {
   return (
     <div className="w-full">
@@ -29,7 +31,7 @@ export default function IfrWaypoints() {
           {
             id: 'ini',
             label: 'INI blank chart',
-            imageUrl: '/assets/ifr-ini-chart.png',
+            imageUrl: assetUrl('assets/ifr-ini-chart.png'),
             bounds: [
               [45.6, 5.4],
               [47.6, 8.4],
@@ -38,7 +40,7 @@ export default function IfrWaypoints() {
           {
             id: 'enrc',
             label: 'ENRC Skyguide chart',
-            imageUrl: '/assets/ifr-enrc-chart.png',
+            imageUrl: assetUrl('assets/ifr-enrc-chart.png'),
             bounds: [
               [45.95, 5.25],
               [48.2, 10.55],
