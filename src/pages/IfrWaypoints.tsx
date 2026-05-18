@@ -42,8 +42,8 @@ export default function IfrWaypoints() {
             label: 'ENRC Skyguide chart',
             imageUrl: assetUrl('assets/ifr-enrc-chart.png'),
             bounds: [
-              [45.95, 5.25],
-              [48.2, 10.55],
+              [45.62, 5.31],
+              [48.15, 10.49],
             ],
           },
         ]}
