@@ -12,14 +12,26 @@ import { ifrWaypoints } from '../data/ifrWaypoints';
 import type { TrainingPoint } from '../types/training';
 
 type DatasetMode = 'geography' | 'ifr';
+type GeographyMapMode = 'geographic' | 'icao';
 type IfrMapMode = 'geographic' | 'ini' | 'enrc';
-
-const switzerlandCenter: LatLngExpression = [46.65, 6.8];
-const ifrCharts: Record<Exclude<IfrMapMode, 'geographic'>, {
+type ChartConfig = {
   label: string;
   imageUrl: string;
   bounds: [[number, number], [number, number]];
-}> = {
+};
+
+const switzerlandCenter: LatLngExpression = [46.65, 6.8];
+const geographyCharts: Record<Exclude<GeographyMapMode, 'geographic'>, ChartConfig> = {
+  icao: {
+    label: 'ICAO chart',
+    imageUrl: '/assets/geography-icao-chart.jpg',
+    bounds: [
+      [45.540373, 5.338622],
+      [47.908042, 10.85492],
+    ],
+  },
+};
+const ifrCharts: Record<Exclude<IfrMapMode, 'geographic'>, ChartConfig> = {
   ini: {
     label: 'INI blank chart',
     imageUrl: '/assets/ifr-ini-chart.png',
@@ -38,7 +50,20 @@ const ifrCharts: Record<Exclude<IfrMapMode, 'geographic'>, {
   },
 };
 
-function getMapCenter(datasetMode: DatasetMode, ifrMapMode: IfrMapMode) {
+function getMapCenter(
+  datasetMode: DatasetMode,
+  geographyMapMode: GeographyMapMode,
+  ifrMapMode: IfrMapMode,
+) {
+  if (datasetMode === 'geography' && geographyMapMode !== 'geographic') {
+    const geographyChart = geographyCharts[geographyMapMode];
+
+    return [
+      (geographyChart.bounds[0][0] + geographyChart.bounds[1][0]) / 2,
+      (geographyChart.bounds[0][1] + geographyChart.bounds[1][1]) / 2,
+    ] as LatLngExpression;
+  }
+
   if (datasetMode === 'ifr' && ifrMapMode !== 'geographic') {
     const ifrChart = ifrCharts[ifrMapMode];
 
@@ -59,15 +84,22 @@ function sortPoints(points: TrainingPoint[]) {
 
 export default function ReferenceMaps() {
   const [datasetMode, setDatasetMode] = useState<DatasetMode>('geography');
+  const [geographyMapMode, setGeographyMapMode] =
+    useState<GeographyMapMode>('geographic');
   const [ifrMapMode, setIfrMapMode] = useState<IfrMapMode>('geographic');
 
   const points = useMemo(() => {
     return sortPoints(datasetMode === 'geography' ? geographyPoints : ifrWaypoints);
   }, [datasetMode]);
+  const activeGeographyChart =
+    datasetMode === 'geography' && geographyMapMode !== 'geographic'
+      ? geographyCharts[geographyMapMode]
+      : null;
   const activeIfrChart =
     datasetMode === 'ifr' && ifrMapMode !== 'geographic'
       ? ifrCharts[ifrMapMode]
       : null;
+  const activeChart = activeGeographyChart ?? activeIfrChart;
 
   return (
     <div className="w-full">
@@ -130,6 +162,38 @@ export default function ReferenceMaps() {
                 </button>
               </div>
 
+              {datasetMode === 'geography' && (
+                <div className="grid gap-2 rounded-3xl bg-slate-100 p-1 sm:grid-cols-2">
+                  <button
+                    type="button"
+                    onClick={() => setGeographyMapMode('geographic')}
+                    className={[
+                      'rounded-full px-4 py-2 text-sm font-bold transition focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2',
+                      geographyMapMode === 'geographic'
+                        ? 'bg-sky-700 text-white shadow-sm shadow-sky-900/20'
+                        : 'text-slate-700 hover:bg-white hover:text-slate-950',
+                    ].join(' ')}
+                  >
+                    Geo map
+                  </button>
+                  {Object.entries(geographyCharts).map(([mode, chart]) => (
+                    <button
+                      key={mode}
+                      type="button"
+                      onClick={() => setGeographyMapMode(mode as GeographyMapMode)}
+                      className={[
+                        'rounded-full px-4 py-2 text-sm font-bold transition focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2',
+                        geographyMapMode === mode
+                          ? 'bg-sky-700 text-white shadow-sm shadow-sky-900/20'
+                          : 'text-slate-700 hover:bg-white hover:text-slate-950',
+                      ].join(' ')}
+                    >
+                      {chart.label}
+                    </button>
+                  ))}
+                </div>
+              )}
+
               {datasetMode === 'ifr' && (
                 <div className="grid gap-2 rounded-3xl bg-slate-100 p-1 sm:grid-cols-3">
                   <button
@@ -167,16 +231,16 @@ export default function ReferenceMaps() {
 
         <div className="h-[30rem] bg-slate-100 sm:h-[38rem] lg:h-[46rem]">
           <MapContainer
-            key={`${datasetMode}-${ifrMapMode}`}
-            center={getMapCenter(datasetMode, ifrMapMode)}
+            key={`${datasetMode}-${geographyMapMode}-${ifrMapMode}`}
+            center={getMapCenter(datasetMode, geographyMapMode, ifrMapMode)}
             zoom={8}
             scrollWheelZoom
             className="h-full w-full"
           >
-            {activeIfrChart ? (
+            {activeChart ? (
               <ImageOverlay
-                url={activeIfrChart.imageUrl}
-                bounds={activeIfrChart.bounds}
+                url={activeChart.imageUrl}
+                bounds={activeChart.bounds}
               />
             ) : (
               <TileLayer

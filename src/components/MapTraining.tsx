@@ -56,9 +56,9 @@ const defaultZoom = 8;
 const mapModeStorageKey = 'fic-delta-map-mode';
 
 const filters: { label: string; value: PointFilter }[] = [
-  { label: 'All points', value: 'all' },
-  { label: 'Only unknown points', value: 'unknown' },
-  { label: 'Only known points', value: 'known' },
+  { label: 'All', value: 'all' },
+  { label: 'Unknown only', value: 'unknown' },
+  { label: 'Known only', value: 'known' },
 ];
 
 const views: { label: string; value: TrainingView }[] = [
@@ -565,7 +565,10 @@ export default function MapTraining({
             </div>
 
             <div className="rounded-2xl border border-slate-200 bg-white p-4 transition-colors dark:border-slate-700 dark:bg-slate-800">
-              <p className="text-sm font-semibold text-slate-700 dark:text-slate-200">Point filter</p>
+              <p className="text-sm font-semibold text-slate-700 dark:text-slate-200">Training scope</p>
+              <p className="mt-1 text-xs font-semibold text-slate-500 dark:text-slate-400">
+                Random draw uses this selection.
+              </p>
               <div className="mt-3 grid gap-2 sm:grid-cols-3 lg:grid-cols-1">
                 {filters.map((filter) => (
                   <button

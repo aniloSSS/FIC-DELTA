@@ -25,6 +25,17 @@ export default function Geography() {
         description="Practice locating key geographical points around the FIC DELTA area."
         points={geographyPoints}
         storageKey="fic-delta-geography-progress"
+        chartMaps={[
+          {
+            id: 'icao',
+            label: 'ICAO chart',
+            imageUrl: '/assets/geography-icao-chart.jpg',
+            bounds: [
+              [45.540373, 5.338622],
+              [47.908042, 10.85492],
+            ],
+          },
+        ]}
       />
     </div>
   );
