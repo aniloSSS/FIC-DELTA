@@ -174,6 +174,9 @@ export default function MapTraining({
     getInitialStatuses(points, storageKey),
   );
   const [pointFilter, setPointFilter] = useState<PointFilter>('all');
+  const [regionFilter, setRegionFilter] = useState('all');
+  const [categoryFilter, setCategoryFilter] = useState('all');
+  const [studyBlockFilter, setStudyBlockFilter] = useState('all');
   const [mapMode, setMapMode] = useState<MapMode>(getInitialMapMode);
   const [searchQuery, setSearchQuery] = useState('');
   const [errorRadius, setErrorRadius] = useState(10);
@@ -182,13 +185,43 @@ export default function MapTraining({
 
   const filteredTrainingPoints = useMemo(() => {
     return points.filter((point) => {
+      if (regionFilter !== 'all' && point.region !== regionFilter) {
+        return false;
+      }
+
+      if (categoryFilter !== 'all' && point.category !== categoryFilter) {
+        return false;
+      }
+
+      if (studyBlockFilter !== 'all' && point.studyBlock !== studyBlockFilter) {
+        return false;
+      }
+
       if (pointFilter === 'all') {
         return true;
       }
 
       return pointStatuses[point.id] === pointFilter;
     });
-  }, [pointFilter, pointStatuses, points]);
+  }, [categoryFilter, pointFilter, pointStatuses, points, regionFilter, studyBlockFilter]);
+
+  const regionOptions = useMemo(() => {
+    return [...new Set(points.map((point) => point.region).filter(Boolean))].sort();
+  }, [points]);
+
+  const categoryOptions = useMemo(() => {
+    return [...new Set(points.map((point) => point.category).filter(Boolean))].sort();
+  }, [points]);
+
+  const studyBlockOptions = useMemo(() => {
+    return [...new Set(points.map((point) => point.studyBlock).filter(Boolean))].sort(
+      (firstBlock, secondBlock) => {
+        const firstNumber = Number(firstBlock?.replace(/\D/g, ''));
+        const secondNumber = Number(secondBlock?.replace(/\D/g, ''));
+        return firstNumber - secondNumber;
+      },
+    );
+  }, [points]);
 
   const sortedPoints = useMemo(() => {
     return [...points].sort((firstPoint, secondPoint) =>
@@ -341,6 +374,18 @@ export default function MapTraining({
     resetAttempt();
 
     const nextPoints = points.filter((point) => {
+      if (regionFilter !== 'all' && point.region !== regionFilter) {
+        return false;
+      }
+
+      if (categoryFilter !== 'all' && point.category !== categoryFilter) {
+        return false;
+      }
+
+      if (studyBlockFilter !== 'all' && point.studyBlock !== studyBlockFilter) {
+        return false;
+      }
+
       if (nextFilter === 'all') {
         return true;
       }
@@ -351,6 +396,36 @@ export default function MapTraining({
     if (!nextPoints.some((point) => point.id === currentPointId)) {
       setCurrentPointId(getRandomPoint(nextPoints)?.id ?? '');
     }
+  }
+
+  function handleStudyFilterChange(
+    nextRegionFilter = regionFilter,
+    nextCategoryFilter = categoryFilter,
+    nextStudyBlockFilter = studyBlockFilter,
+  ) {
+    resetAttempt();
+
+    const nextPoints = points.filter((point) => {
+      if (nextRegionFilter !== 'all' && point.region !== nextRegionFilter) {
+        return false;
+      }
+
+      if (nextCategoryFilter !== 'all' && point.category !== nextCategoryFilter) {
+        return false;
+      }
+
+      if (nextStudyBlockFilter !== 'all' && point.studyBlock !== nextStudyBlockFilter) {
+        return false;
+      }
+
+      if (pointFilter === 'all') {
+        return true;
+      }
+
+      return pointStatuses[point.id] === pointFilter;
+    });
+
+    setCurrentPointId(getRandomPoint(nextPoints, currentPointId)?.id ?? '');
   }
 
   return (
@@ -587,6 +662,90 @@ export default function MapTraining({
                 ))}
               </div>
             </div>
+
+            {(regionOptions.length > 0 ||
+              categoryOptions.length > 0 ||
+              studyBlockOptions.length > 0) && (
+              <div className="rounded-2xl border border-slate-200 bg-white p-4 transition-colors dark:border-slate-700 dark:bg-slate-800">
+                <p className="text-sm font-semibold text-slate-700 dark:text-slate-200">Study filters</p>
+                <p className="mt-1 text-xs font-semibold text-slate-500 dark:text-slate-400">
+                  Train by region, theme, or 10-15 point blocks.
+                </p>
+                <div className="mt-3 grid gap-3">
+                  {regionOptions.length > 0 && (
+                    <label className="block">
+                      <span className="text-xs font-bold uppercase tracking-[0.12em] text-slate-500 dark:text-slate-400">
+                        Region
+                      </span>
+                      <select
+                        value={regionFilter}
+                        onChange={(event) => {
+                          const nextValue = event.target.value;
+                          setRegionFilter(nextValue);
+                          handleStudyFilterChange(nextValue, categoryFilter, studyBlockFilter);
+                        }}
+                        className="mt-1 w-full rounded-2xl border border-slate-300 bg-white px-3 py-2 text-sm font-bold text-slate-800 outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-200 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100"
+                      >
+                        <option value="all">All regions</option>
+                        {regionOptions.map((region) => (
+                          <option key={region} value={region}>
+                            {region}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                  )}
+
+                  {categoryOptions.length > 0 && (
+                    <label className="block">
+                      <span className="text-xs font-bold uppercase tracking-[0.12em] text-slate-500 dark:text-slate-400">
+                        Type
+                      </span>
+                      <select
+                        value={categoryFilter}
+                        onChange={(event) => {
+                          const nextValue = event.target.value;
+                          setCategoryFilter(nextValue);
+                          handleStudyFilterChange(regionFilter, nextValue, studyBlockFilter);
+                        }}
+                        className="mt-1 w-full rounded-2xl border border-slate-300 bg-white px-3 py-2 text-sm font-bold text-slate-800 outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-200 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100"
+                      >
+                        <option value="all">All types</option>
+                        {categoryOptions.map((category) => (
+                          <option key={category} value={category}>
+                            {category}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                  )}
+
+                  {studyBlockOptions.length > 0 && (
+                    <label className="block">
+                      <span className="text-xs font-bold uppercase tracking-[0.12em] text-slate-500 dark:text-slate-400">
+                        Learning block
+                      </span>
+                      <select
+                        value={studyBlockFilter}
+                        onChange={(event) => {
+                          const nextValue = event.target.value;
+                          setStudyBlockFilter(nextValue);
+                          handleStudyFilterChange(regionFilter, categoryFilter, nextValue);
+                        }}
+                        className="mt-1 w-full rounded-2xl border border-slate-300 bg-white px-3 py-2 text-sm font-bold text-slate-800 outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-200 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100"
+                      >
+                        <option value="all">All blocks</option>
+                        {studyBlockOptions.map((studyBlock) => (
+                          <option key={studyBlock} value={studyBlock}>
+                            {studyBlock}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                  )}
+                </div>
+              </div>
+            )}
 
             <div className="grid gap-3 rounded-2xl border border-slate-200 bg-white p-4 transition-colors dark:border-slate-700 dark:bg-slate-800 sm:grid-cols-2 lg:grid-cols-1">
               <button

@@ -1,6 +1,6 @@
 import type { TrainingPoint } from '../types/training';
 
-export const geographyPoints: TrainingPoint[] = [
+const baseGeographyPoints: TrainingPoint[] = [
   {
     id: 'aigle',
     name: 'Aigle',
@@ -650,3 +650,189 @@ export const geographyPoints: TrainingPoint[] = [
     longitude: 7.7491,
   },
 ];
+
+const supplementalGeographyPoints: TrainingPoint[] = [
+  {
+    id: 'col-de-jougne',
+    name: 'Col de Jougne',
+    latitude: 46.7625,
+    longitude: 6.3908,
+  },
+  {
+    id: 'col-de-la-faucille',
+    name: 'Col de la Faucille',
+    latitude: 46.3667,
+    longitude: 6.0147,
+  },
+  {
+    id: 'col-de-la-givrine',
+    name: 'Col de la Givrine',
+    latitude: 46.4542,
+    longitude: 6.1072,
+  },
+  {
+    id: 'col-de-st-cergue',
+    name: 'Col de St Cergue',
+    latitude: 46.4464,
+    longitude: 6.1572,
+  },
+  {
+    id: 'col-des-etroits',
+    name: 'Col des Etroits',
+    latitude: 46.8292,
+    longitude: 6.4992,
+  },
+  {
+    id: 'col-du-marchairuz',
+    name: 'Col du Marchairuz',
+    latitude: 46.5528,
+    longitude: 6.2508,
+  },
+  {
+    id: 'col-du-mollendruz',
+    name: 'Col du Mollendruz',
+    latitude: 46.6508,
+    longitude: 6.3633,
+  },
+  {
+    id: 'creux-du-van',
+    name: 'Creux du Van',
+    latitude: 46.9294,
+    longitude: 6.7242,
+  },
+  {
+    id: 'lac-d-annecy',
+    name: "Lac d'Annecy",
+    latitude: 45.8464,
+    longitude: 6.1719,
+  },
+  {
+    id: 'lac-de-bienne',
+    name: 'Lac de Bienne',
+    latitude: 47.086,
+    longitude: 7.16,
+  },
+  {
+    id: 'lac-de-joux',
+    name: 'Lac de Joux',
+    latitude: 46.632,
+    longitude: 6.285,
+  },
+  {
+    id: 'lac-de-morat',
+    name: 'Lac de Morat',
+    latitude: 46.9305,
+    longitude: 7.087,
+  },
+  {
+    id: 'lac-du-bourget',
+    name: 'Lac du Bourget',
+    latitude: 45.7394,
+    longitude: 5.8758,
+  },
+  {
+    id: 'lac-leman',
+    name: 'Lac Leman',
+    latitude: 46.45,
+    longitude: 6.55,
+  },
+  {
+    id: 'lac-neuchatel',
+    name: 'Lac Neuchatel',
+    latitude: 46.9,
+    longitude: 6.8,
+  },
+  {
+    id: 'vue-des-alpes',
+    name: 'Vue des Alpes',
+    latitude: 47.0736,
+    longitude: 6.8697,
+  },
+];
+
+function getCategory(point: TrainingPoint) {
+  const normalizedName = point.name.toLowerCase();
+
+  if (normalizedName.includes('lac')) {
+    return 'Lakes';
+  }
+
+  if (
+    normalizedName.includes('col ') ||
+    normalizedName.includes('pass') ||
+    normalizedName.includes('bernard') ||
+    normalizedName.includes('simplon')
+  ) {
+    return 'Passes';
+  }
+
+  if (
+    normalizedName.includes('dent') ||
+    normalizedName.includes('dents') ||
+    normalizedName.includes('eiger') ||
+    normalizedName.includes('jungfrau') ||
+    normalizedName.includes('matterhorn') ||
+    normalizedName.includes('muveran') ||
+    normalizedName.includes('saleve') ||
+    normalizedName.includes('chasseral') ||
+    normalizedName.includes('chasseron') ||
+    normalizedName.includes('creux')
+  ) {
+    return 'Mountains';
+  }
+
+  return 'Towns and visual points';
+}
+
+function getRegion(point: TrainingPoint) {
+  const { latitude, longitude } = point;
+
+  if (longitude < 6.2 && latitude > 46.1) {
+    return 'Jura / France';
+  }
+
+  if (latitude < 46.25 && longitude <= 6.85) {
+    return 'Haute-Savoie / Ain';
+  }
+
+  if (latitude < 46.45 && longitude > 6.85) {
+    return 'Valais / Alps';
+  }
+
+  if (longitude >= 7.3 && latitude >= 46.45) {
+    return 'Bernese Oberland';
+  }
+
+  if (latitude >= 46.65 && longitude >= 6.55 && longitude < 7.35) {
+    return 'Three Lakes / Broye';
+  }
+
+  if (latitude >= 46.75 && longitude < 6.75) {
+    return 'Jura / Neuchatel';
+  }
+
+  if (longitude >= 6.0 && longitude <= 7.05 && latitude >= 46.25 && latitude < 46.65) {
+    return 'Lake Geneva';
+  }
+
+  return 'Central sector';
+}
+
+const orderedGeographyPoints = [...baseGeographyPoints, ...supplementalGeographyPoints]
+  .map((point) => ({
+    ...point,
+    category: getCategory(point),
+    region: getRegion(point),
+  }))
+  .sort((firstPoint, secondPoint) =>
+    `${firstPoint.region} ${firstPoint.category} ${firstPoint.name}`.localeCompare(
+      `${secondPoint.region} ${secondPoint.category} ${secondPoint.name}`,
+    ),
+  );
+
+export const geographyPoints: TrainingPoint[] = orderedGeographyPoints.map(
+  (point, index) => ({
+    ...point,
+    studyBlock: `Block ${Math.floor(index / 12) + 1}`,
+  }),
+);

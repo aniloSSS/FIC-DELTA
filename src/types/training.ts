@@ -3,4 +3,7 @@ export type TrainingPoint = {
   name: string;
   latitude: number;
   longitude: number;
+  region?: string;
+  category?: string;
+  studyBlock?: string;
 };
