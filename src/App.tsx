@@ -6,6 +6,7 @@ import Phraseology from './pages/Phraseology';
 import Frequencies from './pages/Frequencies';
 import IcaoNames from './pages/IcaoNames';
 import ReferenceMaps from './pages/ReferenceMaps';
+import TmaGeneva from './pages/TmaGeneva';
 
 export default function App() {
   return (
@@ -19,6 +20,7 @@ export default function App() {
           <Route path="/phraseology" element={<Phraseology />} />
           <Route path="/frequencies" element={<Frequencies />} />
           <Route path="/icao-names" element={<IcaoNames />} />
+          <Route path="/tma-geneva" element={<TmaGeneva />} />
           <Route path="/reference-maps" element={<ReferenceMaps />} />
         </Routes>
       </main>

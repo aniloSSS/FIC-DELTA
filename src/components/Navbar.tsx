@@ -6,6 +6,7 @@ const links = [
   { label: 'Phraseology', to: '/phraseology' },
   { label: 'Frequencies', to: '/frequencies' },
   { label: 'ICAO Names', to: '/icao-names' },
+  { label: 'TMA Genève', to: '/tma-geneva' },
   { label: 'Reference Maps', to: '/reference-maps' },
 ];
 
@@ -23,7 +24,7 @@ export default function Navbar() {
         </div>
 
         <nav aria-label="Main navigation">
-          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-6 xl:flex xl:items-center xl:gap-2">
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-7 xl:flex xl:items-center xl:gap-2">
             {links.map((link) => (
               <NavLink
                 key={link.to}
