@@ -221,6 +221,10 @@ export default function MapTraining({
   const [pointEdits, setPointEdits] = useState<PointEdits>(() =>
     getInitialPointEdits(storageKey),
   );
+  const [editingBlockName, setEditingBlockName] = useState<string | null>(null);
+  const [draftBlockName, setDraftBlockName] = useState('');
+  const [addPointBlock, setAddPointBlock] = useState<string | null>(null);
+  const [selectedPointToAdd, setSelectedPointToAdd] = useState('');
   const [mapMode, setMapMode] = useState<MapMode>(getInitialMapMode);
   const [searchQuery, setSearchQuery] = useState('');
   const [errorRadius, setErrorRadius] = useState(10);
@@ -420,6 +424,49 @@ export default function MapTraining({
       persistPointEdits(nextPointEdits);
       return nextPointEdits;
     });
+  }
+
+  function renameStudyBlock(oldStudyBlock: string, nextStudyBlock: string) {
+    const cleanBlockName = nextStudyBlock.trim();
+
+    if (!cleanBlockName || cleanBlockName === oldStudyBlock) {
+      setEditingBlockName(null);
+      return;
+    }
+
+    const nextPointEdits = editedPoints
+      .filter((point) => (point.studyBlock || 'No block') === oldStudyBlock)
+      .reduce<PointEdits>(
+        (edits, point) => ({
+          ...edits,
+          [point.id]: {
+            ...pointEdits[point.id],
+            studyBlock: cleanBlockName,
+          },
+        }),
+        { ...pointEdits },
+      );
+
+    setPointEdits(nextPointEdits);
+    persistPointEdits(nextPointEdits);
+    setEditingBlockName(null);
+    setListStudyBlockFilter((currentFilter) =>
+      currentFilter === oldStudyBlock ? cleanBlockName : currentFilter,
+    );
+  }
+
+  function removePointFromBlock(pointId: string) {
+    savePointEdit(pointId, { studyBlock: '' });
+  }
+
+  function addPointToBlock(studyBlock: string) {
+    if (!selectedPointToAdd) {
+      return;
+    }
+
+    savePointEdit(selectedPointToAdd, { studyBlock });
+    setSelectedPointToAdd('');
+    setAddPointBlock(null);
   }
 
   function handleMapModeChange(nextMapMode: MapMode) {
@@ -1005,92 +1052,149 @@ export default function MapTraining({
 
           <div className="mt-4 grid gap-4">
             {visibleListGroups.length > 0 ? (
-              visibleListGroups.map((group) => (
-                <section
-                  key={group.studyBlock}
-                  className="rounded-2xl border border-slate-200 bg-white/70 p-3 dark:border-slate-700 dark:bg-slate-800/60"
-                >
-                  <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-                    <h4 className="text-sm font-black uppercase tracking-[0.14em] text-slate-800 dark:text-slate-100">
-                      {group.studyBlock}
-                    </h4>
-                    <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-600 dark:bg-slate-900 dark:text-slate-300">
-                      {group.points.length} points
-                    </span>
-                  </div>
+              visibleListGroups.map((group) => {
+                const availablePointsForGroup = sortedPoints.filter(
+                  (point) => (point.studyBlock || 'No block') !== group.studyBlock,
+                );
 
-                  <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
-                    {group.points.map((point) => {
-                      const isKnown = pointStatuses[point.id] === 'known';
-
-                      return (
-                        <div
-                          key={point.id}
-                          className={[
-                            'grid gap-2 rounded-lg border p-2 transition',
-                            isKnown
-                              ? 'border-emerald-200 bg-emerald-50 hover:border-emerald-300 dark:border-emerald-800 dark:bg-emerald-950/40'
-                              : 'border-red-200 bg-red-50 hover:border-red-300 dark:border-red-900 dark:bg-red-950/35',
-                          ].join(' ')}
+                return (
+                  <section
+                    key={group.studyBlock}
+                    className="rounded-xl border border-slate-200 bg-white/70 p-2 dark:border-slate-700 dark:bg-slate-800/60"
+                  >
+                    <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 pb-2 dark:border-slate-700">
+                      {editingBlockName === group.studyBlock ? (
+                        <form
+                          className="flex min-w-0 flex-1 items-center gap-2"
+                          onSubmit={(event) => {
+                            event.preventDefault();
+                            renameStudyBlock(group.studyBlock, draftBlockName);
+                          }}
                         >
-                          <div className="flex items-center justify-between gap-2">
-                            <span
-                              className={[
-                                'inline-flex rounded-full px-1.5 py-0 text-[9px] font-bold uppercase tracking-[0.1em]',
-                                isKnown
-                                  ? 'bg-emerald-100 text-emerald-800'
-                                  : 'bg-red-100 text-red-700',
-                              ].join(' ')}
-                            >
-                              {isKnown ? 'known' : 'unknown'}
-                            </span>
-                            <label className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.1em] text-slate-600 dark:text-slate-300">
-                              Known
-                              <input
-                                type="checkbox"
-                                checked={isKnown}
-                                onChange={(event) =>
-                                  savePointStatus(
-                                    point.id,
-                                    event.target.checked ? 'known' : 'unknown',
-                                  )
-                                }
-                                className="h-4 w-4 shrink-0 accent-emerald-600"
-                              />
-                            </label>
-                          </div>
+                          <input
+                            value={draftBlockName}
+                            onChange={(event) => setDraftBlockName(event.target.value)}
+                            className="min-w-0 flex-1 rounded-lg border border-sky-300 bg-white px-2 py-1 text-xs font-black text-slate-950 outline-none focus:ring-2 focus:ring-sky-200 dark:border-sky-700 dark:bg-slate-900 dark:text-white"
+                          />
+                          <button type="submit" className="rounded-full bg-sky-700 px-2 py-1 text-xs font-black text-white">
+                            OK
+                          </button>
+                        </form>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => setListStudyBlockFilter(group.studyBlock === 'No block' ? '' : group.studyBlock)}
+                          className="min-w-0 truncate text-left text-xs font-black uppercase tracking-[0.12em] text-slate-800 transition hover:text-sky-700 dark:text-slate-100 dark:hover:text-sky-300"
+                        >
+                          {group.studyBlock}
+                        </button>
+                      )}
 
-                          <label className="grid gap-1">
-                            <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-500 dark:text-slate-400">
-                              Name
-                            </span>
+                      <div className="flex items-center gap-1">
+                        <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-bold text-slate-600 dark:bg-slate-900 dark:text-slate-300">
+                          {group.points.length}
+                        </span>
+                        {group.studyBlock !== 'No block' && (
+                          <>
+                            <button
+                              type="button"
+                              title="Rename block"
+                              onClick={() => {
+                                setEditingBlockName(group.studyBlock);
+                                setDraftBlockName(group.studyBlock);
+                              }}
+                              className="rounded-full border border-slate-300 bg-white px-2 py-0.5 text-xs font-black text-slate-700 transition hover:border-sky-400 hover:text-sky-700 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-200"
+                            >
+                              ✎
+                            </button>
+                            <button
+                              type="button"
+                              title="Add point"
+                              onClick={() => {
+                                setAddPointBlock(addPointBlock === group.studyBlock ? null : group.studyBlock);
+                                setSelectedPointToAdd('');
+                              }}
+                              className="rounded-full border border-slate-300 bg-white px-2 py-0.5 text-xs font-black text-slate-700 transition hover:border-sky-400 hover:text-sky-700 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-200"
+                            >
+                              +
+                            </button>
+                          </>
+                        )}
+                      </div>
+                    </div>
+
+                    {addPointBlock === group.studyBlock && (
+                      <div className="mt-2 grid gap-2 rounded-lg border border-sky-200 bg-sky-50 p-2 dark:border-sky-800 dark:bg-sky-950/40 sm:grid-cols-[minmax(0,1fr)_auto]">
+                        <select
+                          value={selectedPointToAdd}
+                          onChange={(event) => setSelectedPointToAdd(event.target.value)}
+                          className="min-w-0 rounded-lg border border-sky-200 bg-white px-2 py-1 text-xs font-bold text-slate-900 outline-none dark:border-sky-700 dark:bg-slate-900 dark:text-slate-100"
+                        >
+                          <option value="">Choose an existing point</option>
+                          {availablePointsForGroup.map((point) => (
+                            <option key={point.id} value={point.id}>
+                              {point.name} {point.studyBlock ? `(${point.studyBlock})` : '(No block)'}
+                            </option>
+                          ))}
+                        </select>
+                        <button
+                          type="button"
+                          onClick={() => addPointToBlock(group.studyBlock)}
+                          className="rounded-full bg-sky-700 px-3 py-1 text-xs font-black text-white"
+                        >
+                          Add
+                        </button>
+                      </div>
+                    )}
+
+                    <div className="mt-2 grid gap-1 sm:grid-cols-2 xl:grid-cols-4">
+                      {group.points.map((point) => {
+                        const isKnown = pointStatuses[point.id] === 'known';
+
+                        return (
+                          <div
+                            key={point.id}
+                            className={[
+                              'flex min-w-0 items-center gap-2 rounded-lg border px-2 py-1 transition',
+                              isKnown
+                                ? 'border-emerald-200 bg-emerald-50 dark:border-emerald-800 dark:bg-emerald-950/40'
+                                : 'border-red-200 bg-red-50 dark:border-red-900 dark:bg-red-950/35',
+                            ].join(' ')}
+                          >
+                            <input
+                              type="checkbox"
+                              checked={isKnown}
+                              onChange={(event) =>
+                                savePointStatus(
+                                  point.id,
+                                  event.target.checked ? 'known' : 'unknown',
+                                )
+                              }
+                              className="h-3.5 w-3.5 shrink-0 accent-emerald-600"
+                              title="Known"
+                            />
                             <input
                               value={point.name}
                               onChange={(event) => savePointEdit(point.id, { name: event.target.value })}
-                              className="min-w-0 rounded-md border border-white/70 bg-white/80 px-2 py-1 text-xs font-bold text-slate-950 outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-200 dark:border-slate-700 dark:bg-slate-900/80 dark:text-slate-100"
+                              className="min-w-0 flex-1 border-0 bg-transparent p-0 text-xs font-bold text-slate-950 outline-none dark:text-slate-100"
                             />
-                          </label>
-
-                          <label className="grid gap-1">
-                            <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-500 dark:text-slate-400">
-                              Block
-                            </span>
-                            <input
-                              list={`${storageKey}-blocks`}
-                              value={point.studyBlock ?? ''}
-                              placeholder="No block"
-                              onChange={(event) =>
-                                savePointEdit(point.id, { studyBlock: event.target.value })
-                              }
-                              className="min-w-0 rounded-md border border-white/70 bg-white/80 px-2 py-1 text-xs font-bold text-slate-950 outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-200 dark:border-slate-700 dark:bg-slate-900/80 dark:text-slate-100"
-                            />
-                          </label>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </section>
-              ))
+                            {group.studyBlock !== 'No block' && (
+                              <button
+                                type="button"
+                                title="Remove from block"
+                                onClick={() => removePointFromBlock(point.id)}
+                                className="shrink-0 rounded-full px-1.5 text-xs font-black text-slate-500 transition hover:bg-red-100 hover:text-red-700 dark:text-slate-300 dark:hover:bg-red-950"
+                              >
+                                -
+                              </button>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </section>
+                );
+              })
             ) : (
               <div className="rounded-2xl border border-slate-200 bg-white p-6 text-center text-sm font-semibold text-slate-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400">
                 No point matches your search.
