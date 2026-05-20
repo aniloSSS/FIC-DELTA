@@ -750,8 +750,105 @@ const supplementalGeographyPoints: TrainingPoint[] = [
   },
 ];
 
+const aerodromeGeographyPoints: TrainingPoint[] = [
+  {
+    id: 'aerodrome-bern-lszb',
+    name: 'Bern LSZB',
+    latitude: 46.9141,
+    longitude: 7.4972,
+  },
+  {
+    id: 'aerodrome-bex-lsgb',
+    name: 'Bex LSGB',
+    latitude: 46.2583,
+    longitude: 6.9864,
+  },
+  {
+    id: 'aerodrome-bressaucourt-lszq',
+    name: 'Bressaucourt LSZQ',
+    latitude: 47.3925,
+    longitude: 7.0286,
+  },
+  {
+    id: 'aerodrome-ecuvillens-lsge',
+    name: 'Ecuvillens LSGE',
+    latitude: 46.755,
+    longitude: 7.0761,
+  },
+  {
+    id: 'aerodrome-geneve-lsgg',
+    name: 'Geneve LSGG',
+    latitude: 46.2381,
+    longitude: 6.109,
+  },
+  {
+    id: 'aerodrome-gruyeres-lsgt',
+    name: 'Gruyeres LSGT',
+    latitude: 46.5942,
+    longitude: 7.0944,
+  },
+  {
+    id: 'aerodrome-la-cote-lsgp',
+    name: 'La Cote LSGP',
+    latitude: 46.4064,
+    longitude: 6.2581,
+  },
+  {
+    id: 'aerodrome-lausanne-lsgl',
+    name: 'Lausanne LSGL',
+    latitude: 46.5453,
+    longitude: 6.6167,
+  },
+  {
+    id: 'aerodrome-les-eplatures-lsgc',
+    name: 'Les Eplatures LSGC',
+    latitude: 47.0839,
+    longitude: 6.7928,
+  },
+  {
+    id: 'aerodrome-meiringen-lsmm',
+    name: 'Meiringen LSMM',
+    latitude: 46.7433,
+    longitude: 8.11,
+  },
+  {
+    id: 'aerodrome-neuchatel-lsgn',
+    name: 'Neuchatel LSGN',
+    latitude: 46.9575,
+    longitude: 6.8647,
+  },
+  {
+    id: 'aerodrome-payerne-lsmp',
+    name: 'Payerne LSMP',
+    latitude: 46.8432,
+    longitude: 6.9151,
+  },
+  {
+    id: 'aerodrome-saanen-lsgk',
+    name: 'Saanen LSGK',
+    latitude: 46.4875,
+    longitude: 7.2508,
+  },
+  {
+    id: 'aerodrome-sion-lsgs',
+    name: 'Sion LSGS',
+    latitude: 46.2196,
+    longitude: 7.3268,
+  },
+  {
+    id: 'aerodrome-yverdon-lsgy',
+    name: 'Yverdon-les-Bains LSGY',
+    latitude: 46.7619,
+    longitude: 6.6133,
+  },
+];
+
 function getCategory(point: TrainingPoint) {
   const normalizedName = point.name.toLowerCase();
+
+  if (normalizedName.includes('ls')) {
+    return 'Aerodromes';
+  }
 
   if (normalizedName.includes('lac')) {
     return 'Lakes';
@@ -783,6 +880,59 @@ function getCategory(point: TrainingPoint) {
 
   return 'Towns and visual points';
 }
+
+function getStudyBlock(point: TrainingPoint) {
+  if (point.category === 'Aerodromes') {
+    return 'Aerodromes / Airports';
+  }
+
+  if (point.category === 'Passes') {
+    return 'Passes / Cols';
+  }
+
+  if (point.category === 'Mountains') {
+    return 'Mountains / Relief';
+  }
+
+  if (point.category === 'Lakes') {
+    return 'Lakes';
+  }
+
+  if (point.region === 'Lake Geneva') {
+    return 'Lake Geneva / Geneva Periphery';
+  }
+
+  if (point.region === 'Jura / France' || point.region === 'Jura / Neuchatel') {
+    return 'Jura';
+  }
+
+  if (point.region === 'Haute-Savoie / Ain') {
+    return 'Haute-Savoie / Ain';
+  }
+
+  if (point.region === 'Valais / Alps' || point.region === 'Bernese Oberland') {
+    return 'Alps';
+  }
+
+  if (point.region === 'Three Lakes / Broye') {
+    return 'Three Lakes / Broye';
+  }
+
+  return 'Central sector';
+}
+
+const studyBlockOrder = [
+  'Lake Geneva / Geneva Periphery',
+  'Jura',
+  'Haute-Savoie / Ain',
+  'Three Lakes / Broye',
+  'Passes / Cols',
+  'Mountains / Relief',
+  'Lakes',
+  'Alps',
+  'Aerodromes / Airports',
+  'Central sector',
+];
 
 function getRegion(point: TrainingPoint) {
   const { latitude, longitude } = point;
@@ -818,21 +968,24 @@ function getRegion(point: TrainingPoint) {
   return 'Central sector';
 }
 
-const orderedGeographyPoints = [...baseGeographyPoints, ...supplementalGeographyPoints]
+const orderedGeographyPoints = [
+  ...baseGeographyPoints,
+  ...supplementalGeographyPoints,
+  ...aerodromeGeographyPoints,
+]
   .map((point) => ({
     ...point,
     category: getCategory(point),
     region: getRegion(point),
   }))
+  .map((point) => ({
+    ...point,
+    studyBlock: getStudyBlock(point),
+  }))
   .sort((firstPoint, secondPoint) =>
-    `${firstPoint.region} ${firstPoint.category} ${firstPoint.name}`.localeCompare(
-      `${secondPoint.region} ${secondPoint.category} ${secondPoint.name}`,
-    ),
+    (studyBlockOrder.indexOf(firstPoint.studyBlock ?? '') -
+      studyBlockOrder.indexOf(secondPoint.studyBlock ?? '')) ||
+    firstPoint.name.localeCompare(secondPoint.name),
   );
 
-export const geographyPoints: TrainingPoint[] = orderedGeographyPoints.map(
-  (point, index) => ({
-    ...point,
-    studyBlock: `Block ${Math.floor(index / 12) + 1}`,
-  }),
-);
+export const geographyPoints: TrainingPoint[] = orderedGeographyPoints;

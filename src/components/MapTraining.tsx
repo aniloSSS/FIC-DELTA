@@ -71,6 +71,19 @@ const views: { label: string; value: TrainingView }[] = [
   { label: 'Points list', value: 'points' },
 ];
 
+const preferredStudyBlockOrder = [
+  'Lake Geneva / Geneva Periphery',
+  'Jura',
+  'Haute-Savoie / Ain',
+  'Three Lakes / Broye',
+  'Passes / Cols',
+  'Mountains / Relief',
+  'Lakes',
+  'Alps',
+  'Aerodromes / Airports',
+  'Central sector',
+];
+
 function getInitialMapMode(): MapMode {
   if (typeof window === 'undefined') {
     return 'blank';
@@ -256,9 +269,21 @@ export default function MapTraining({
   const studyBlockOptions = useMemo(() => {
     return [...new Set(editedPoints.map((point) => point.studyBlock).filter(Boolean))].sort(
       (firstBlock, secondBlock) => {
+        const firstOrder = preferredStudyBlockOrder.indexOf(firstBlock ?? '');
+        const secondOrder = preferredStudyBlockOrder.indexOf(secondBlock ?? '');
+
+        if (firstOrder !== -1 || secondOrder !== -1) {
+          return (firstOrder === -1 ? 999 : firstOrder) - (secondOrder === -1 ? 999 : secondOrder);
+        }
+
         const firstNumber = Number(firstBlock?.replace(/\D/g, ''));
         const secondNumber = Number(secondBlock?.replace(/\D/g, ''));
-        return firstNumber - secondNumber;
+
+        if (!Number.isNaN(firstNumber) && !Number.isNaN(secondNumber)) {
+          return firstNumber - secondNumber;
+        }
+
+        return String(firstBlock).localeCompare(String(secondBlock));
       },
     );
   }, [editedPoints]);
@@ -299,6 +324,24 @@ export default function MapTraining({
       return point.name.toLowerCase().includes(normalizedSearch);
     });
   }, [listStudyBlockFilter, searchQuery, sortedPoints]);
+
+  const visibleListGroups = useMemo(() => {
+    return visibleListPoints.reduce<Array<{ studyBlock: string; points: TrainingPoint[] }>>(
+      (groups, point) => {
+        const studyBlock = point.studyBlock || 'No block';
+        const existingGroup = groups.find((group) => group.studyBlock === studyBlock);
+
+        if (existingGroup) {
+          existingGroup.points.push(point);
+        } else {
+          groups.push({ studyBlock, points: [point] });
+        }
+
+        return groups;
+      },
+      [],
+    );
+  }, [visibleListPoints]);
 
   const currentPoint =
     filteredTrainingPoints.find((point) => point.id === currentPointId) ??
@@ -954,76 +997,94 @@ export default function MapTraining({
             </div>
           )}
 
-          <div className="mt-4 grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
-            {visibleListPoints.length > 0 ? (
-              visibleListPoints.map((point) => {
-                const isKnown = pointStatuses[point.id] === 'known';
-
-                return (
-                  <div
-                    key={point.id}
-                    className={[
-                      'grid gap-2 rounded-lg border p-2 transition',
-                      isKnown
-                        ? 'border-emerald-200 bg-emerald-50 hover:border-emerald-300 dark:border-emerald-800 dark:bg-emerald-950/40'
-                        : 'border-red-200 bg-red-50 hover:border-red-300 dark:border-red-900 dark:bg-red-950/35',
-                    ].join(' ')}
-                  >
-                    <div className="flex items-center justify-between gap-2">
-                      <span
-                        className={[
-                          'inline-flex rounded-full px-1.5 py-0 text-[9px] font-bold uppercase tracking-[0.1em]',
-                          isKnown
-                            ? 'bg-emerald-100 text-emerald-800'
-                            : 'bg-red-100 text-red-700',
-                        ].join(' ')}
-                      >
-                        {isKnown ? 'known' : 'unknown'}
-                      </span>
-                      <label className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.1em] text-slate-600 dark:text-slate-300">
-                        Known
-                        <input
-                          type="checkbox"
-                          checked={isKnown}
-                          onChange={(event) =>
-                            savePointStatus(
-                              point.id,
-                              event.target.checked ? 'known' : 'unknown',
-                            )
-                          }
-                          className="h-4 w-4 shrink-0 accent-emerald-600"
-                        />
-                      </label>
-                    </div>
-
-                    <label className="grid gap-1">
-                      <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-500 dark:text-slate-400">
-                        Name
-                      </span>
-                      <input
-                        value={point.name}
-                        onChange={(event) => savePointEdit(point.id, { name: event.target.value })}
-                        className="min-w-0 rounded-md border border-white/70 bg-white/80 px-2 py-1 text-xs font-bold text-slate-950 outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-200 dark:border-slate-700 dark:bg-slate-900/80 dark:text-slate-100"
-                      />
-                    </label>
-
-                    <label className="grid gap-1">
-                      <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-500 dark:text-slate-400">
-                        Block
-                      </span>
-                      <input
-                        list={`${storageKey}-blocks`}
-                        value={point.studyBlock ?? ''}
-                        placeholder="No block"
-                        onChange={(event) =>
-                          savePointEdit(point.id, { studyBlock: event.target.value })
-                        }
-                        className="min-w-0 rounded-md border border-white/70 bg-white/80 px-2 py-1 text-xs font-bold text-slate-950 outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-200 dark:border-slate-700 dark:bg-slate-900/80 dark:text-slate-100"
-                      />
-                    </label>
+          <div className="mt-4 grid gap-4">
+            {visibleListGroups.length > 0 ? (
+              visibleListGroups.map((group) => (
+                <section
+                  key={group.studyBlock}
+                  className="rounded-2xl border border-slate-200 bg-white/70 p-3 dark:border-slate-700 dark:bg-slate-800/60"
+                >
+                  <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+                    <h4 className="text-sm font-black uppercase tracking-[0.14em] text-slate-800 dark:text-slate-100">
+                      {group.studyBlock}
+                    </h4>
+                    <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-600 dark:bg-slate-900 dark:text-slate-300">
+                      {group.points.length} points
+                    </span>
                   </div>
-                );
-              })
+
+                  <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
+                    {group.points.map((point) => {
+                      const isKnown = pointStatuses[point.id] === 'known';
+
+                      return (
+                        <div
+                          key={point.id}
+                          className={[
+                            'grid gap-2 rounded-lg border p-2 transition',
+                            isKnown
+                              ? 'border-emerald-200 bg-emerald-50 hover:border-emerald-300 dark:border-emerald-800 dark:bg-emerald-950/40'
+                              : 'border-red-200 bg-red-50 hover:border-red-300 dark:border-red-900 dark:bg-red-950/35',
+                          ].join(' ')}
+                        >
+                          <div className="flex items-center justify-between gap-2">
+                            <span
+                              className={[
+                                'inline-flex rounded-full px-1.5 py-0 text-[9px] font-bold uppercase tracking-[0.1em]',
+                                isKnown
+                                  ? 'bg-emerald-100 text-emerald-800'
+                                  : 'bg-red-100 text-red-700',
+                              ].join(' ')}
+                            >
+                              {isKnown ? 'known' : 'unknown'}
+                            </span>
+                            <label className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.1em] text-slate-600 dark:text-slate-300">
+                              Known
+                              <input
+                                type="checkbox"
+                                checked={isKnown}
+                                onChange={(event) =>
+                                  savePointStatus(
+                                    point.id,
+                                    event.target.checked ? 'known' : 'unknown',
+                                  )
+                                }
+                                className="h-4 w-4 shrink-0 accent-emerald-600"
+                              />
+                            </label>
+                          </div>
+
+                          <label className="grid gap-1">
+                            <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-500 dark:text-slate-400">
+                              Name
+                            </span>
+                            <input
+                              value={point.name}
+                              onChange={(event) => savePointEdit(point.id, { name: event.target.value })}
+                              className="min-w-0 rounded-md border border-white/70 bg-white/80 px-2 py-1 text-xs font-bold text-slate-950 outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-200 dark:border-slate-700 dark:bg-slate-900/80 dark:text-slate-100"
+                            />
+                          </label>
+
+                          <label className="grid gap-1">
+                            <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-500 dark:text-slate-400">
+                              Block
+                            </span>
+                            <input
+                              list={`${storageKey}-blocks`}
+                              value={point.studyBlock ?? ''}
+                              placeholder="No block"
+                              onChange={(event) =>
+                                savePointEdit(point.id, { studyBlock: event.target.value })
+                              }
+                              className="min-w-0 rounded-md border border-white/70 bg-white/80 px-2 py-1 text-xs font-bold text-slate-950 outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-200 dark:border-slate-700 dark:bg-slate-900/80 dark:text-slate-100"
+                            />
+                          </label>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </section>
+              ))
             ) : (
               <div className="rounded-2xl border border-slate-200 bg-white p-6 text-center text-sm font-semibold text-slate-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400">
                 No point matches your search.
