@@ -7,14 +7,13 @@ export default function TmaGeneva() {
         <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.22em] text-sky-300">
-              Geneva Airspace
+              Espace aerien Geneve
             </p>
-            <h1 className="mt-2 text-3xl font-black text-white sm:text-4xl">
-              TMA Genève
-            </h1>
+            <h1 className="mt-2 text-3xl font-black text-white sm:text-4xl">TMA Geneve</h1>
           </div>
           <p className="max-w-2xl text-sm leading-6 text-slate-300 sm:text-base">
-            Interactive training for Geneva TMA shapes, classes and vertical limits.
+            Entrainement interactif pour apprendre les formes, classes et limites verticales des
+            TMA de Geneve.
           </p>
         </div>
       </section>

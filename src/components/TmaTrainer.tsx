@@ -10,7 +10,7 @@ import TmaSidebar from './TmaSidebar';
 type TmaMode = 'learn' | 'quiz' | 'flashcards';
 
 const modes: { label: string; value: TmaMode }[] = [
-  { label: 'Learn', value: 'learn' },
+  { label: 'Apprendre', value: 'learn' },
   { label: 'Quiz', value: 'quiz' },
   { label: 'Flashcards', value: 'flashcards' },
 ];
@@ -23,6 +23,7 @@ export default function TmaTrainer() {
     altitudes: true,
     classes: true,
     numbersOnly: false,
+    cityLabels: false,
   });
 
   function toggleVisibility(key: keyof TmaVisibility) {
@@ -41,11 +42,11 @@ export default function TmaTrainer() {
         <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <p className="text-xs font-bold uppercase tracking-[0.24em] text-sky-300">
-              TMA Geneva module
+              Module TMA Geneve
             </p>
-            <h2 className="mt-2 text-3xl font-black text-white">Interactive TMA Training</h2>
+            <h2 className="mt-2 text-3xl font-black text-white">Entrainement interactif TMA</h2>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-300">
-              Learn Geneva TMA shapes, classes and vertical limits with an ATC-style interactive map.
+              Apprends les formes, classes et limites verticales des TMA de Geneve avec une carte interactive.
             </p>
           </div>
 
@@ -81,10 +82,10 @@ export default function TmaTrainer() {
             <div className="grid gap-4">
               <div className="grid gap-2 rounded-3xl border border-slate-700 bg-slate-950/70 p-3 sm:grid-cols-2 lg:grid-cols-4">
                 {[
-                  ['names', 'Names'],
+                  ['names', 'Noms'],
                   ['altitudes', 'Altitudes'],
                   ['classes', 'Classes'],
-                  ['numbersOnly', 'Numbers only'],
+                  ['numbersOnly', 'Numeros seuls'],
                 ].map(([key, label]) => (
                   <label
                     key={key}

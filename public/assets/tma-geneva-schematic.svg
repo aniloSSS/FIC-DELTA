@@ -1,0 +1,137 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000">
+  <rect width="1000" height="1000" fill="#ffffff"/>
+  <defs>
+    <style>
+      .zone{fill:#fafafa;stroke:#cfcfcf;stroke-width:10;stroke-linejoin:round}
+      .inner{fill:none;stroke:#e3e3e3;stroke-width:5;stroke-linejoin:round}
+      .text{fill:#777;font-family:Arial,Helvetica,sans-serif;font-weight:800;font-size:26px;letter-spacing:.5px}
+      .small{fill:#111;font-family:Arial,Helvetica,sans-serif;font-weight:900;font-size:18px}
+      .box{fill:#fff;stroke:#111;stroke-width:2}
+      .class{fill:#222}
+      .classText{fill:#fff;font-family:Arial,Helvetica,sans-serif;font-weight:900;font-size:22px}
+    </style>
+  </defs>
+
+  <text x="735" y="58" class="text" style="font-size:34px;fill:#555">GENEVE</text>
+
+  <path class="zone" d="M156 247 L326 247 L498 126 L619 39 L792 138 L862 280 L799 375 L846 391 L850 469 L743 552 L661 704 L506 757 L443 942 L90 900 L106 808 L144 704 C97 648 101 552 142 493 L114 440 Z"/>
+
+  <path class="zone" d="M154 247 L326 247 L498 126 L445 274 L280 365 L114 440 Z"/>
+  <text x="190" y="272" class="text">TMA GENEVE 4.1</text>
+
+  <path class="zone" d="M445 274 L498 126 L619 39 L734 100 L586 237 Z"/>
+  <text x="478" y="196" class="text" transform="rotate(-53 478 196)">TMA GENEVE 4</text>
+
+  <path class="zone" d="M619 39 L792 138 L862 280 L799 375 L586 237 L734 100 Z"/>
+  <text x="795" y="198" class="text" transform="rotate(51 795 198)">TMA GENEVE 5</text>
+
+  <path class="zone" d="M142 493 L280 365 L445 274 L520 328 L270 558 L132 620 C110 580 113 532 142 493 Z"/>
+  <text x="260" y="435" class="text" transform="rotate(-38 260 435)">TMA GENEVE 3</text>
+
+  <path class="zone" d="M445 274 L586 237 L736 369 L520 568 L430 510 L520 328 Z"/>
+  <text x="605" y="430" class="text" transform="rotate(-39 605 430)">TMA GENEVE 1</text>
+
+  <path class="zone" d="M270 558 L430 510 L520 568 L408 705 L260 628 Z"/>
+  <text x="430" y="625" class="text" transform="rotate(-34 430 625)">TMA GENEVE 2</text>
+
+  <path class="zone" d="M586 237 L799 375 L846 391 L850 469 L743 552 L520 568 L736 369 Z"/>
+  <text x="735" y="395" class="text" transform="rotate(-35 735 395)">TMA GENEVE 6</text>
+
+  <path class="zone" d="M520 568 L743 552 L661 704 L506 757 L408 705 Z"/>
+  <text x="633" y="530" class="text" transform="rotate(-35 633 530)">TMA GENEVE 7</text>
+
+  <path class="zone" d="M144 704 L408 705 L506 757 L443 810 L106 808 Z"/>
+  <text x="300" y="752" class="text" transform="rotate(-9 300 752)">TMA GENEVE 8</text>
+
+  <path class="zone" d="M106 808 L443 810 L425 865 L150 883 Z"/>
+  <text x="292" y="830" class="text" transform="rotate(-6 292 830)">TMA GENEVE 9</text>
+
+  <path class="zone" d="M150 883 L425 865 L443 942 L90 900 Z"/>
+  <text x="260" y="895" class="text" transform="rotate(-7 260 895)">TMA GENEVE 10</text>
+
+  <ellipse cx="386" cy="501" rx="77" ry="168" transform="rotate(38 386 501)" fill="#fff" stroke="#898989" stroke-width="9"/>
+  <text x="375" y="510" class="text" transform="rotate(-52 375 510)">CTR GENEVE</text>
+
+  <g transform="translate(542 287)">
+    <rect class="box" width="78" height="70"/>
+    <rect class="class" x="0" y="0" width="27" height="27"/>
+    <text class="classText" x="7" y="21">C</text>
+    <text class="small" x="32" y="22">FL195</text>
+    <text class="small" x="32" y="43">3500</text>
+    <text class="small" x="33" y="64">AGL</text>
+  </g>
+  <g transform="translate(394 225)">
+    <rect class="box" width="86" height="50"/>
+    <rect class="class" width="27" height="27"/>
+    <text class="classText" x="7" y="21">C</text>
+    <text class="small" x="32" y="20">FL195</text>
+    <text class="small" x="32" y="42">FL075</text>
+  </g>
+  <g transform="translate(675 100)">
+    <rect class="box" width="86" height="50"/>
+    <rect class="class" width="27" height="27"/>
+    <text class="classText" x="7" y="21">C</text>
+    <text class="small" x="32" y="20">FL195</text>
+    <text class="small" x="32" y="42">FL75</text>
+  </g>
+  <g transform="translate(840 280)">
+    <rect class="box" width="86" height="50"/>
+    <rect class="class" width="27" height="27"/>
+    <text class="classText" x="7" y="21">C</text>
+    <text class="small" x="32" y="20">FL195</text>
+    <text class="small" x="32" y="42">FL085</text>
+  </g>
+  <g transform="translate(615 630)">
+    <rect class="box" width="86" height="50"/>
+    <rect class="class" width="27" height="27"/>
+    <text class="classText" x="7" y="21">C</text>
+    <text class="small" x="32" y="20">FL195</text>
+    <text class="small" x="32" y="42">FL105</text>
+  </g>
+  <g transform="translate(390 680)">
+    <rect class="box" width="86" height="50"/>
+    <rect class="class" width="27" height="27"/>
+    <text class="classText" x="7" y="21">C</text>
+    <text class="small" x="32" y="20">FL195</text>
+    <text class="small" x="32" y="42">FL095</text>
+  </g>
+  <g transform="translate(185 810)">
+    <rect class="box" width="86" height="50"/>
+    <rect class="class" width="27" height="27"/>
+    <text class="classText" x="7" y="21">C</text>
+    <text class="small" x="32" y="20">FL195</text>
+    <text class="small" x="32" y="42">FL115</text>
+  </g>
+  <g transform="translate(320 910)">
+    <rect class="box" width="86" height="50"/>
+    <rect class="class" width="27" height="27"/>
+    <text class="classText" x="7" y="21">C</text>
+    <text class="small" x="32" y="20">FL155</text>
+    <text class="small" x="32" y="42">FL115</text>
+  </g>
+  <g transform="translate(155 388)">
+    <rect class="box" width="86" height="90"/>
+    <rect class="class" width="27" height="27"/>
+    <text class="classText" x="7" y="21">C</text>
+    <text class="small" x="32" y="20">FL195</text>
+    <text class="small" x="32" y="42">6500</text>
+    <text class="small" x="32" y="64">3500</text>
+    <text class="small" x="31" y="84">AGL</text>
+  </g>
+  <g transform="translate(150 570)">
+    <rect class="box" width="86" height="90"/>
+    <rect class="class" width="27" height="27"/>
+    <text class="classText" x="7" y="21">C</text>
+    <text class="small" x="32" y="20">FL195</text>
+    <text class="small" x="32" y="42">5500</text>
+    <text class="small" x="32" y="64">3500</text>
+    <text class="small" x="31" y="84">AGL</text>
+  </g>
+  <g transform="translate(270 585)">
+    <rect class="box" width="75" height="38"/>
+    <rect class="class" width="27" height="27"/>
+    <text class="classText" x="7" y="21">D</text>
+    <text class="small" x="33" y="20">4000</text>
+    <text class="small" x="33" y="38">GND</text>
+  </g>
+</svg>

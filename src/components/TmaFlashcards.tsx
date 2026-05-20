@@ -67,7 +67,7 @@ export default function TmaFlashcards({ zones }: TmaFlashcardsProps) {
               Flashcards
             </p>
             <p className="mt-1 text-sm font-semibold text-slate-400">
-              {remaining} cards in current filter
+              {remaining} cartes dans le filtre actuel
             </p>
           </div>
           <select
@@ -79,10 +79,10 @@ export default function TmaFlashcards({ zones }: TmaFlashcardsProps) {
             }}
             className="rounded-2xl border border-slate-600 bg-slate-900 px-3 py-2 text-sm font-bold text-white outline-none"
           >
-            <option value="all">All cards</option>
-            <option value="unknown">Only unknown</option>
-            <option value="learning">Only learning</option>
-            <option value="known">Only known</option>
+            <option value="all">Toutes les cartes</option>
+            <option value="unknown">Seulement unknown</option>
+            <option value="learning">Seulement learning</option>
+            <option value="known">Seulement known</option>
           </select>
         </div>
 
@@ -103,13 +103,19 @@ export default function TmaFlashcards({ zones }: TmaFlashcardsProps) {
               <h3 className="mt-6 text-4xl font-black text-white">
                 {currentCard.floor} - {currentCard.ceiling}
               </h3>
-              <p className="mt-3 text-lg font-bold text-sky-200">Class {currentCard.airspaceClass}</p>
+              <p className="mt-3 text-lg font-bold text-sky-200">Classe {currentCard.airspaceClass}</p>
               <p className="mt-4 text-sm leading-6 text-slate-300">{currentCard.description}</p>
               <div className="mt-5 max-w-sm">
                 <TmaMap
                   zones={zones}
                   selectedZoneId={currentCard.id}
-                  visibility={{ names: false, altitudes: false, classes: false, numbersOnly: true }}
+                  visibility={{
+                    names: false,
+                    altitudes: false,
+                    classes: false,
+                    numbersOnly: true,
+                    cityLabels: false,
+                  }}
                   onSelectZone={() => undefined}
                 />
               </div>
@@ -119,7 +125,7 @@ export default function TmaFlashcards({ zones }: TmaFlashcardsProps) {
       </div>
 
       <aside className="rounded-3xl border border-slate-700 bg-slate-950/70 p-5 shadow-xl shadow-sky-950/20">
-        <p className="text-xs font-bold uppercase tracking-[0.22em] text-sky-300">Card status</p>
+        <p className="text-xs font-bold uppercase tracking-[0.22em] text-sky-300">Statut de la carte</p>
         <div className="mt-4 grid gap-3">
           {(['known', 'learning', 'unknown'] as TmaFlashcardStatus[]).map((status) => (
             <button
@@ -141,7 +147,7 @@ export default function TmaFlashcards({ zones }: TmaFlashcardsProps) {
             onClick={handleNext}
             className="mt-3 rounded-full bg-white px-5 py-3 text-sm font-black text-slate-950 transition hover:bg-slate-200"
           >
-            Next card
+            Carte suivante
           </button>
         </div>
       </aside>

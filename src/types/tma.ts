@@ -14,11 +14,19 @@ export type TmaZone = {
   labelPosition: [number, number];
 };
 
+export type TmaCityLabel = {
+  id: string;
+  name: string;
+  x: number;
+  y: number;
+};
+
 export type TmaVisibility = {
   names: boolean;
   altitudes: boolean;
   classes: boolean;
   numbersOnly: boolean;
+  cityLabels: boolean;
 };
 
 export type TmaDifficulty = 'easy' | 'medium' | 'hard' | 'expert';
