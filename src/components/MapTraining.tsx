@@ -59,6 +59,12 @@ type PointEdits = Record<string, PointEdit>;
 const switzerlandCenter: LatLngExpression = [46.65, 6.8];
 const defaultZoom = 8;
 const mapModeStorageKey = 'fic-delta-map-mode';
+const swisstopoAttribution =
+  '&copy; <a href="https://www.swisstopo.admin.ch/">swisstopo</a>';
+const swisstopoColorTiles =
+  'https://wmts.geo.admin.ch/1.0.0/ch.swisstopo.pixelkarte-farbe/default/current/3857/{z}/{x}/{y}.jpeg';
+const swisstopoGrayTiles =
+  'https://wmts.geo.admin.ch/1.0.0/ch.swisstopo.pixelkarte-grau/default/current/3857/{z}/{x}/{y}.jpeg';
 
 const filters: { label: string; value: PointFilter }[] = [
   { label: 'All', value: 'all' },
@@ -601,8 +607,8 @@ export default function MapTraining({
             >
               {activeMapMode === 'learning' ? (
                 <TileLayer
-                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                  attribution={swisstopoAttribution}
+                  url={swisstopoColorTiles}
                 />
               ) : selectedChartMap ? (
                 <ImageOverlay
@@ -611,8 +617,8 @@ export default function MapTraining({
                 />
               ) : (
                 <TileLayer
-                  attribution='&copy; OpenStreetMap contributors &copy; CARTO'
-                  url="https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png"
+                  attribution={swisstopoAttribution}
+                  url={swisstopoGrayTiles}
                 />
               )}
               <MapClickHandler onMapClick={handleMapClick} />
